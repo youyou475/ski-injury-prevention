@@ -1,0 +1,24 @@
+# 大体积视频素材（约 557 MB，不纳入版本控制）
+# 运行前请将 23 段全景视频放入 assets/video/<slug>.mp4
+assets/video/*.mp4
+assets/video/*.mov
+assets/video/*.m4v
+
+# 原始素材 / 音频中间产物
+raw_source/
+*.aiff
+*.wav
+
+# macOS
+.DS_Store
+**/.DS_Store
+._*
+
+# 编辑器 / IDE
+.vscode/
+.idea/
+*.swp
+
+# 日志与临时文件
+*.log
+*.tmp

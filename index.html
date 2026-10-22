@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>雪线之上 · 预防滑雪运动损伤 | 交互式全景科普学习系统</title>
+<meta name="description" content="基于 4K 全景素材构建的交互式滑雪损伤预防科普学习系统，含情境决策引擎、全景视角热点、结构化知识卡与前后测学习闭环。">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b1a2e'/%3E%3Ctext x='16' y='22' font-size='18' text-anchor='middle' fill='%234fc3f7'%3E%E2%9D%84%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+
+<!-- ============ 启动页 · 模块选择 ============ -->
+<section id="splash" class="splash">
+  <div class="splash-inner">
+    <div class="brand-mark">❄</div>
+    <h1 class="splash-title">雪线之上</h1>
+    <p class="splash-sub">预防滑雪运动损伤 · 交互式科普学习系统</p>
+    <p class="splash-desc">
+      后冬奥时代，冰雪运动走出季节与地域的限制，参与人群持续扩大。<br>
+      但多数的滑雪损伤，并不发生在极限瞬间，而发生在身体尚未准备好的那几分钟。
+    </p>
+
+    <button id="hubPoints" class="hub-points" type="button" title="点击查看学习档案">查看我的等级与积分</button>
+
+    <p class="hub-lead">选择你感兴趣的学习方式，四个模块共享同一份学习档案与积分：</p>
+    <div id="moduleHub" class="module-hub">
+      <button class="mc" data-module="video">
+        <span class="mc-ic">🎬</span>
+        <span class="mc-body">
+          <strong>视频学习</strong>
+          <small>23 段全景讲解，环视雪场实景，情境决策学安全</small>
+          <span class="mc-progress">0 / 23 段已学</span>
+        </span>
+        <span class="mc-points">0 分</span>
+      </button>
+      <button class="mc" data-module="quiz">
+        <span class="mc-ic">📝</span>
+        <span class="mc-body">
+          <strong>知识测试</strong>
+          <small>前测 + 后测各 6 题，量化你的掌握程度与进步</small>
+          <span class="mc-progress">前测未做 · 后测未做</span>
+        </span>
+        <span class="mc-points">0 分</span>
+      </button>
+      <button class="mc" data-module="lab">
+        <span class="mc-ic">🔬</span>
+        <span class="mc-body">
+          <strong>损伤机理 3D 实验室</strong>
+          <small>拖动力度滑杆，看韧带拉伤、骨折、扭伤如何发生</small>
+          <span class="mc-progress">0 / 4 个机理已探索</span>
+        </span>
+        <span class="mc-points">0 分</span>
+      </button>
+      <button class="mc" data-module="slope">
+        <span class="mc-ic">🏔️</span>
+        <span class="mc-body">
+          <strong>全景滑雪场</strong>
+          <small>3D 场景亲身体验滑雪全程，5 个站点边玩边学</small>
+          <span class="mc-progress">0 / 5 站</span>
+        </span>
+        <span class="mc-points">0 分</span>
+      </button>
+    </div>
+
+    <div class="splash-meta">
+      <span>23 段 4K 全景素材</span><span class="dot">·</span>
+      <span>3 大篇章</span><span class="dot">·</span>
+      <span>4 类损伤机理</span><span class="dot">·</span>
+      <span>1 座 3D 滑雪场</span>
+    </div>
+    <button id="btnHubArchive" class="btn btn-ghost btn-sm splash-archive">📊 学习档案</button>
+  </div>
+</section>
+
+<!-- ============ 学习主界面 ============ -->
+<div id="app" class="app hidden">
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="logo-dot"></span>
+      <strong>雪线之上</strong>
+      <span class="topbar-sub">预防滑雪运动损伤</span>
+    </div>
+    <nav id="chapterTabs" class="chapter-tabs"></nav>
+    <div class="topbar-right">
+      <div class="score-chip" title="统一积分 · 点击查看学习档案">
+        <span class="score-label">积分</span>
+        <span id="scoreValue">0</span>
+      </div>
+      <button id="btnArchive" class="btn btn-sm">📊 学习档案</button>
+      <button id="btnLab3D" class="btn btn-sm btn-lab" title="3D 交互：拖动力度滑杆，观察损伤如何发生">🔬 损伤实验室</button>
+      <button id="btnSki3D" class="btn btn-sm btn-ski" title="3D 场景：亲身体验滑雪全程">🏔️ 全景滑雪场</button>
+      <button id="btnBackSplash" class="btn btn-sm btn-ghost">首页</button>
+    </div>
+  </header>
+
+  <main class="stage">
+    <!-- 全景视口 -->
+    <section class="viewport">
+      <canvas id="pano"></canvas>
+      <div id="hotspotLayer" class="hotspot-layer"></div>
+
+      <div class="hud">
+        <div class="hud-title">
+          <span id="hudChapter" class="hud-chip"></span>
+          <span id="hudNode"></span>
+        </div>
+        <div id="hudHint" class="hud-hint"></div>
+      </div>
+
+      <div id="subtitleBar" class="subtitle-bar">
+        <span class="sub-tag">教练原声</span>
+        <span id="subText" class="sub-text"></span>
+      </div>
+
+      <div id="fallbackNotice" class="fallback-notice hidden">
+        当前环境未启用 WebGL，已切换为平面播放模式（画面可左右拖动查看）
+      </div>
+
+      <div id="panoGuide" class="pano-guide hidden">🖱 拖动画面环视四周 · 滚轮缩放视角 · 触屏单指拖动同样适用</div>
+
+      <div class="controls">
+        <button id="btnPlay" class="ctrl" aria-label="播放/暂停">❚❚</button>
+        <div class="progress-wrap">
+          <div class="progress">
+            <div id="progressBar" class="progress-fill"></div>
+          </div>
+          <span id="timeLabel" class="time-label">0:00 / 0:00</span>
+        </div>
+        <button id="btnPrev" class="ctrl" aria-label="上一节">◀◀</button>
+        <button id="btnNext" class="ctrl" aria-label="下一节">▶▶</button>
+        <button id="btnReset" class="ctrl" aria-label="复位视角">⌖</button>
+        <button id="btnSub" class="ctrl" aria-label="字幕开关" title="字幕开/关">字</button>
+        <button id="btnFull" class="ctrl" aria-label="全屏">⛶</button>
+      </div>
+    </section>
+
+    <!-- 侧栏 -->
+    <aside class="sidepanel">
+      <div class="panel-block">
+        <h3 class="panel-title">章节进度</h3>
+        <div id="progressSummary" class="progress-summary"></div>
+        <ul id="nodeList" class="node-list"></ul>
+      </div>
+      <div class="panel-block grow">
+        <h3 class="panel-title">本节知识卡</h3>
+        <div id="knowledgeCard" class="know-card"></div>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<!-- ============ 弹层 ============ -->
+<div id="overlay" class="overlay hidden">
+  <div class="overlay-panel">
+    <button id="overlayClose" class="overlay-close" aria-label="关闭">✕</button>
+    <div id="overlayBody"></div>
+  </div>
+</div>
+
+<!-- ============ 损伤机理实验室（3D） ============ -->
+<div id="lab3d" class="lab3d hidden">
+  <header class="lab-top">
+    <div class="lab-title">
+      <span class="lab-title-ic">🔬</span>
+      <span>
+        <strong>损伤机理实验室</strong>
+        <small>3D 交互 · 看得见的损伤力学</small>
+      </span>
+    </div>
+    <div class="lab-top-right">
+      <div class="score-chip" title="统一积分">
+        <span class="score-label">积分</span>
+        <span id="labPoints">0</span>
+      </div>
+      <button id="labArchive" class="btn btn-sm">📊 学习档案</button>
+      <button id="labClose" class="btn btn-sm btn-ghost" aria-label="返回首页">首页</button>
+    </div>
+  </header>
+  <div class="lab-body">
+    <nav id="labModules" class="lab-modules" aria-label="损伤类型"></nav>
+    <div class="lab-stage">
+      <div id="labCanvasWrap" class="lab-canvas-wrap">
+        <canvas id="labCanvas"></canvas>
+        <div id="labGuide" class="lab-guide hidden">👉 拖动画面从任意角度观察模型，往下拖滑杆就能看到韧带如何受伤</div>
+        <div class="lab-hint">🖱 拖拽旋转 · 滚轮缩放 · 双指捏合 · 拖拽滑杆调节力度</div>
+      </div>
+      <div class="lab-control">
+        <div class="lab-ctrl-head">
+          <span id="labCtrlLabel" class="lab-ctrl-label"></span>
+          <span id="labCtrlValue" class="lab-ctrl-value"></span>
+        </div>
+        <input id="labSlider" type="range" min="0" max="100" value="15" aria-label="致损因素强度">
+        <div id="labZones" class="lab-zones"></div>
+        <div id="labStageText" class="lab-stage-text stage-0"></div>
+        <div class="lab-btns">
+          <button id="labPlay" class="lab-btn">▶ 播放演示</button>
+          <button id="labReset" class="lab-btn ghost">↺ 重置</button>
+          <button id="labAnatomy" class="lab-btn ghost on">🫀 解剖透视</button>
+        </div>
+      </div>
+    </div>
+    <aside class="lab-info">
+      <h3 id="labModName" class="lab-info-title"></h3>
+      <div class="lab-sec"><h4>发生机制</h4><p id="labMechanism"></p></div>
+      <div class="lab-sec"><h4>高危人群</h4><p id="labRisk"></p></div>
+      <div class="lab-sec"><h4>预防要点</h4><ul id="labPrevention"></ul></div>
+      <div class="lab-sec"><h4>资料依据</h4><div id="labRefs" class="lab-refs"></div></div>
+      <div id="labDisclaimer" class="lab-disclaimer"></div>
+    </aside>
+  </div>
+</div>
+
+<!-- 积分 Toast 容器 -->
+<div id="toastBox" class="toast-box" aria-live="polite"></div>
+
+<!-- ============ 全景滑雪场（3D 场景学习） ============ -->
+<div id="ski3d" class="ski3d hidden"></div>
+
+<!-- 视频纹理源（隐藏，双缓冲无缝切换） -->
+<div class="video-pool" aria-hidden="true">
+  <video id="videoA" playsinline webkit-playsinline preload="auto"></video>
+  <video id="videoB" playsinline webkit-playsinline preload="auto"></video>
+</div>
+
+<!-- data.js：file:// 协议兜底数据源（浏览器禁止 fetch 本地 JSON），由 工作文件/gen_data_js.py 生成 -->
+<script src="data/data.js"></script>
+<script src="js/vendor/three.min.js"></script>
+<script src="js/vendor/GLTFLoader.js"></script>
+<script src="js/progress.js"></script>
+<script src="js/panorama.js"></script>
+<script src="js/injury3d.js"></script>
+<script src="js/ski3d.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
